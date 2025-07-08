@@ -67,7 +67,13 @@ class WeatherScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             //weather forecast cards
-            const Placeholder(fallbackHeight: 150),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Weather Forecast',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
             const SizedBox(height: 20),
             //additional information cards
             const Placeholder(fallbackHeight: 150),
@@ -77,3 +83,5 @@ class WeatherScreen extends StatelessWidget {
     );
   }
 }
+
+//default alignment of Align widget is center
