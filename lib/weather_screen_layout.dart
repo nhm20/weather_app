@@ -4,9 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:weather_app/additional_info_item.dart';
 import 'package:weather_app/hourly_forecast_card.dart';
-import 'package:http/http.dart' as http;
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -16,6 +17,9 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
+  late Future<Map<String, dynamic>> weather;
+
+  // Fetch weather data
   Future<Map<String, dynamic>> getCurrentWeather() async {
     try {
       String city = "London";
@@ -23,10 +27,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
       final res = await http.get(
         Uri.parse(
-          'https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apiKey',
+          'https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apiKey&units=metric',
         ),
       );
-      // debugPrint(res.body);
+
       final data = jsonDecode(res.body);
       if (data['cod'] != '200') {
         throw "Error fetching weather data: ${data['message']}";
@@ -38,47 +42,101 @@ class _WeatherScreenState extends State<WeatherScreen> {
     }
   }
 
+  // Map weather descriptions to icons
+  IconData getWeatherIcon(String description) {
+    switch (description.toLowerCase()) {
+      case 'clouds':
+        return Icons.cloud;
+      case 'rain':
+        return Icons.beach_access;
+      case 'clear':
+        return Icons.wb_sunny;
+      case 'snow':
+        return Icons.ac_unit;
+      default:
+        return Icons.wb_cloudy;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    weather = getCurrentWeather();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Weather App',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: () {
               setState(() {
-                // Trigger a rebuild to refresh the weather data
+                weather = getCurrentWeather();
               });
             },
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: getCurrentWeather(),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: weather,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator.adaptive());
+            return const Center(child: CircularProgressIndicator.adaptive());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, color: Colors.red, size: 48),
+                  const SizedBox(height: 8),
+                  Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        weather = getCurrentWeather();
+                      });
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           } else {
             final data = snapshot.data!;
-            final currentWeatherData = data['list'][0];
-            final currentTemp = currentWeatherData['main']['temp'];
-            final weatherDescription = currentWeatherData['weather'][0]['main'];
-            final pressure = currentWeatherData['main']['pressure'];
-            final humidity = currentWeatherData['main']['humidity'];
-            final windSpeed = currentWeatherData['wind']['speed'];
+
+            // Safety: Check list existence
+            final List<dynamic> forecastList = data['list'] ?? [];
+            if (forecastList.isEmpty) {
+              return const Center(child: Text("No weather data available."));
+            }
+
+            final currentWeatherData = forecastList[0];
+            final mainData = currentWeatherData['main'] ?? {};
+            final weatherArray = currentWeatherData['weather'] ?? [];
+            final windData = currentWeatherData['wind'] ?? {};
+
+            final currentTemp = mainData['temp'] ?? 0.0;
+            final weatherDescription = weatherArray.isNotEmpty
+                ? weatherArray[0]['main'] ?? 'Unknown'
+                : 'Unknown';
+            final pressure = mainData['pressure'] ?? 0;
+            final humidity = mainData['humidity'] ?? 0;
+            final windSpeed = windData['speed'] ?? 0.0;
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //main card
+                  // Main weather card
                   SizedBox(
                     width: double.infinity,
                     child: Card(
@@ -95,29 +153,22 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  '$currentTemp °K',
-                                  style: TextStyle(
+                                  '${currentTemp.toStringAsFixed(1)} °C',
+                                  style: const TextStyle(
                                     fontSize: 48,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Icon(
-                                  weatherDescription == 'Clouds' ||
-                                          weatherDescription == 'Rain'
-                                      ? Icons.cloud
-                                      : Icons.sunny,
+                                  getWeatherIcon(weatherDescription),
                                   size: 64,
-                                  color:
-                                      weatherDescription == 'Clouds' ||
-                                          weatherDescription == 'Rain'
-                                      ? Colors.blue
-                                      : Colors.yellow,
-                                ), // Placeholder for weather icon
-                                SizedBox(height: 16),
+                                  color: Colors.blue,
+                                ),
+                                const SizedBox(height: 16),
                                 Text(
                                   weatherDescription,
-                                  style: TextStyle(fontSize: 24),
+                                  style: const TextStyle(fontSize: 24),
                                 ),
                               ],
                             ),
@@ -127,7 +178,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  //weather forecast cards
+
+                  // Hourly Forecast
                   const Text(
                     "Hourly Forecast",
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -136,36 +188,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   SizedBox(
                     height: 120,
                     child: ListView.builder(
-                      itemCount: 5,
+                      itemCount: forecastList.length >= 6
+                          ? 5
+                          : forecastList.length - 1,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
-                        final hourlyForecast = data['list'][index + 1];
-                        final hourlySky = hourlyForecast['weather'][0]['main'];
-                        final hourlyTemp = hourlyForecast['main']['temp'];
-                        final time = DateTime.parse(
-                          hourlyForecast['dt_txt'],
-                        );
+                        final hourlyForecast = forecastList[index + 1];
+                        final hourlyMain = hourlyForecast['main'] ?? {};
+                        final hourlyWeather = hourlyForecast['weather'] ?? [];
+
+                        final hourlySky = hourlyWeather.isNotEmpty
+                            ? hourlyWeather[0]['main'] ?? 'Unknown'
+                            : 'Unknown';
+                        final hourlyTemp = hourlyMain['temp'] ?? 0.0;
+                        final time = DateTime.parse(hourlyForecast['dt_txt']);
+
                         return HourlyForecastCard(
-                          // time: DateFormat.Hm().format(time),
                           time: DateFormat.j().format(time),
-                          icon: hourlySky == 'Clouds'
-                              ? Icons.cloud
-                              : hourlySky == 'Rain'
-                              ? Icons.beach_access
-                              : Icons.sunny,
-                          temperature: "$hourlyTemp °K",
+                          icon: getWeatherIcon(hourlySky),
+                          temperature: '${hourlyTemp.toStringAsFixed(1)} °C',
                         );
                       },
                     ),
                   ),
                   const SizedBox(height: 20),
-                  //additional information cards
+
+                  // Additional Info
                   const Text(
                     "Additional Information",
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -175,14 +228,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         value: '$humidity%',
                       ),
                       AdditionalInfoItem(
-                        icon: Icons.beach_access,
+                        icon: Icons.speed,
                         label: 'Pressure',
                         value: '$pressure hPa',
                       ),
                       AdditionalInfoItem(
                         icon: Icons.air,
                         label: 'Wind Speed',
-                        value: '$windSpeed m/s',
+                        value: '${windSpeed.toStringAsFixed(1)} m/s',
                       ),
                     ],
                   ),
@@ -195,8 +248,3 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 }
-
-//no need of brackets if there is only one statement in the if block or loops
-// if more than one widgets then use for...[<widget>]
-//ListView is used to create a scrollable list of widgets
-//it takes full  screen
