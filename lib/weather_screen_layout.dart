@@ -73,66 +73,54 @@ class WeatherScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Card(
-                  elevation: 6,
-                  child: Container(
-                    width: 100,
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '03:00',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Icon(Icons.wb_sunny, size: 32, color: Colors.yellow),
-                        const SizedBox(height: 8),
-                        Text('30 °F'),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  elevation: 6,
-                  child: Container(
-                    width: 100,
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '03:00',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Icon(Icons.wb_sunny, size: 32, color: Colors.yellow),
-                        const SizedBox(height: 8),
-                        Text('30 °F'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  HourlyForecastCard(),
+                  HourlyForecastCard(),
+                  HourlyForecastCard(),
+                  HourlyForecastCard(),
+                  HourlyForecastCard(),
+                ],
+              ),
             ),
-
             const SizedBox(height: 20),
             //additional information cards
-            const Placeholder(fallbackHeight: 150),
+            const Text(
+              "Additional Information",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HourlyForecastCard extends StatelessWidget {
+  const HourlyForecastCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 6,
+      child: Container(
+        width: 100,
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '03:00',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Icon(Icons.wb_sunny, size: 32, color: Colors.yellow),
+            const SizedBox(height: 8),
+            Text('30 °F'),
           ],
         ),
       ),
