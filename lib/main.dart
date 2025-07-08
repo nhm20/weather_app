@@ -12,18 +12,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      // theme: ThemeData(
-      //   scaffoldBackgroundColor: Colors.white,
-      // ),
-      // theme:ThemeData.dark(useMaterial3: true).copyWith(
-      //   scaffoldBackgroundColor: Colors.black,
-      //   appBarTheme: const AppBarTheme(
-      //     backgroundColor: Colors.black,
-      //     foregroundColor: Colors.white,
-      //     elevation: 0,
-      //   ),
-      // ),
       theme: ThemeData.dark(useMaterial3: true),
       home: WeatherScreen(),
     );
