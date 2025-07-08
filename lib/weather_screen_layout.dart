@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:weather_app/additional_info_item.dart';
 import 'package:weather_app/hourly_forecast_card.dart';
 import 'package:http/http.dart' as http;
@@ -130,44 +131,27 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  // SingleChildScrollView(
-                  //   scrollDirection: Axis.horizontal,
-                  //   child: Row(
-                  //     children: [
-                  //       for (int i = 0; i < 10; i++)
-                  //         HourlyForecastCard(
-                  //           time: data['list'][i + 1]['dt'].toString(),
-                  //           icon:
-                  //               data['list'][i + 1]['weather'][0]['main'] ==
-                  //                   'Clouds'
-                  //               ? Icons.cloud
-                  //               : data['list'][i + 1]['weather'][0]['main'] ==
-                  //                     'Rain'
-                  //               ? Icons.beach_access
-                  //               : Icons.sunny,
-                  //           temperature:
-                  //               "${data['list'][i + 1]['main']['temp']} °K",
-                  //         ),
-                  //     ],
-                  //   ),
-                  // ),
                   SizedBox(
                     height: 120,
                     child: ListView.builder(
                       itemCount: 5,
+                      scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
+                        final hourlyForecast = data['list'][index + 1];
+                        final hourlySky = hourlyForecast['weather'][0]['main'];
+                        final hourlyTemp = hourlyForecast['main']['temp'];
+                        final time = DateTime.parse(
+                          hourlyForecast['dt_txt'],
+                        );
                         return HourlyForecastCard(
-                          time: data['list'][index + 1]['dt_text'].toString(),
-                          icon:
-                              data['list'][index + 1]['weather'][0]['main'] ==
-                                  'Clouds'
+                          // time: DateFormat.Hm().format(time),
+                          time: DateFormat.j().format(time),
+                          icon: hourlySky == 'Clouds'
                               ? Icons.cloud
-                              : data['list'][index + 1]['weather'][0]['main'] ==
-                                    'Rain'
+                              : hourlySky == 'Rain'
                               ? Icons.beach_access
                               : Icons.sunny,
-                          temperature:
-                              "${data['list'][index + 1]['main']['temp']} °K",
+                          temperature: "$hourlyTemp °K",
                         );
                       },
                     ),
