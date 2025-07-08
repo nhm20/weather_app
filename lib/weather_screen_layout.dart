@@ -51,7 +51,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {
-              print('refresh tapped');
+              setState(() {
+                // Trigger a rebuild to refresh the weather data
+              });
             },
           ),
         ],
