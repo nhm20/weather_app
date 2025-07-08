@@ -25,6 +25,8 @@ class HourlyForecastCard extends StatelessWidget {
             Text(
               time,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
             Icon(icon, size: 32, color: Colors.yellow),
