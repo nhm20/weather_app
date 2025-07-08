@@ -66,6 +66,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // print(context.runtimeType);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -248,3 +249,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 }
+
+//constrains go down means the widget will take up all available space
+//size goes up means the widget will take up only the space it needs
+
+//flutter works
+//flutter does not translate widgets to native code
+//flutter uses a rendering engine called Skia which is now replaced by Impeller backend
+
+//widget tree
+//widget is a blueprint of the UI
+//they dont render anything on the screen
+//they are immutable and describe how the UI should look
+//render object tree
+//render objects are the actual objects that get painted on the screen
+//RichText is a widget that can display text with different styles
+//LeafRenderObject is a render object that does not have any children //error
+//SingleChildRenderObject is a render object that has only one child //colorBox
+//MultiChildRenderObject is a render object that has multiple children //column
+
+//element tree
+//element tree is the bridge between the widget tree and the render object tree
+//elements are mutable and can change the widget tree
+//elements are created when app starts, when the widget is inserted into the tree
+//elements are destroyed when the widget is removed from the tree
+//elements are reused when the widget is updated
+//elements are the ones that hold the state of the widget
+
+//element tree is a tree of elements that are created when the app starts
+//flutter creates an element for each widget in the widget tree
+//it performs reconciliation or diffing to update the widget tree
+//it compares the old widget tree with the new widget tree and updates the render object tree accordingly
+// element tree handles the lifecycle of the widget
+
+//element tree is reason for hot reload
