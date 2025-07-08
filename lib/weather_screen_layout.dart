@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class WeatherScreen extends StatelessWidget {
@@ -21,17 +23,56 @@ class WeatherScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          //main card
-          const Placeholder(fallbackHeight: 250),
-          const SizedBox(height: 20),
-          //weather forecast cards
-          const Placeholder(fallbackHeight: 150),
-          const SizedBox(height: 20),
-          //additional information cards
-          const Placeholder(fallbackHeight: 150),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            //main card
+            SizedBox(
+              width: double.infinity,
+              child: Card(
+                elevation: 10,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            '200 °F',
+                            style: TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Icon(
+                            Icons.cloud,
+                            size: 64,
+                            color: Colors.blue,
+                          ), // Placeholder for weather icon
+                          SizedBox(height: 16),
+                          Text('Partly Cloudy', style: TextStyle(fontSize: 24)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            //weather forecast cards
+            const Placeholder(fallbackHeight: 150),
+            const SizedBox(height: 20),
+            //additional information cards
+            const Placeholder(fallbackHeight: 150),
+          ],
+        ),
       ),
     );
   }
